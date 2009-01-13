@@ -8,7 +8,7 @@ Version: 1.2
 Author URI: http://www.weaselhat.com/
 */
 
-/* LICENSE (New BSD)
+/* LICENSE (Modified BSD)
 Copyright (c) 2006, Michael Greenberg.  Derivative work of the Hivelogic Enkoder, Copyright (c) 2006, Automatic Corp.
 All rights reserved.
 
