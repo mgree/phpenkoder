@@ -3,7 +3,7 @@ Contributors: michael_greenberg
 Donate link: http://www.weaselhat.com/phpenkoder/
 Tags: spam, mailto, email, e-mail, encrypt, javascript, enkoder
 Requires at least: 2.0
-Tested up to: 2.6.2
+Tested up to: 2.7
 Stable tag: 1.2
 
 Encodes mailto: links and e-mail addresses with JavaScript to stifle
