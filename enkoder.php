@@ -2,56 +2,78 @@
 /*
 Plugin Name: PHPEnkoder
 Plugin URI: http://www.weaselhat.com/phpenkoder/
-Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module.  Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
+Description: An anti-spam text scrambler based on the <a
+href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on
+Rails TextHelper module.  Hat tip: Dan Benjamin for the original Ruby
+code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.2
+Version: 1.3
 Author URI: http://www.weaselhat.com/
 */
 
 /* LICENSE (Modified BSD)
-Copyright (c) 2006, Michael Greenberg.  Derivative work of the Hivelogic Enkoder, Copyright (c) 2006, Automatic Corp.
+Copyright (c) 2006, Michael Greenberg.  Derivative work of the
+Hivelogic Enkoder, Copyright (c) 2006, Automatic Corp.
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
 
-	1. Redistributions of source code must retain the above copyright notice,
-	this list of conditions and the following disclaimer.
+	1. Redistributions of source code must retain the above
+	copyright notice, this list of conditions and the following
+	disclaimer.
 
-	2. Redistributions in binary form must reproduce the above copyright notice,
-	this list of conditions and the following disclaimer in the documentation
-	and/or other materials provided with the distribution.
+	2. Redistributions in binary form must reproduce the above
+	copyright notice, this list of conditions and the following
+	disclaimer in the documentation and/or other materials
+	provided with the distribution.
 
-	3. Neither the name of Michael Greenberg, AUTOMATIC CORP. nor the names of
-        its contributors may be used to endorse or promote products derived from this
-        software without specific prior written permission.
+	3. Neither the name of Michael Greenberg, AUTOMATIC CORP. nor
+        the names of its contributors may be used to endorse or
+        promote products derived from this software without specific
+        prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
 /* 
-Hello.  You probably don't want to read a lot of PHP.  I never really liked dollar signs, anyway.
+Hello.  You probably don't want to read a lot of PHP.  I never really
+liked dollar signs, anyway.
 
-By default, the plugin will filter all of your content and RSS.  If you want to turn this  off, you can still use the enkode() function to manually encode text.  Just pass it the text you want to encode and it will return what you should write instead.  As a shortcut, there's also the function enkode_mailto which takes an e-mail address and some link text (and optionally a subject line and link title); it will return the encoded mailto link with the given parameters.
+By default, the plugin will filter all of your content and RSS.  If
+you want to turn this off, you can still use the enkode() function to
+manually encode text.  Just pass it the text you want to encode and it
+will return what you should write instead.  As a shortcut, there's
+also the function enkode_mailto which takes an e-mail address and some
+link text (and optionally a subject line and link title); it will
+return the encoded mailto link with the given parameters.
 
-To those of you who indeed love dollar signs and archaic syntax, enjoy.  Functions prefixed with enkode_ are for public use; those with enkoder_ are for plugin setup; and those with enk_ are intended to be private.
+To those of you who indeed love dollar signs and archaic syntax,
+enjoy.  Functions prefixed with enkode_ are for public use; those with
+enkoder_ are for plugin setup; and those with enk_ are intended to be
+private.
 */
 
 /* WORDPRESS LOGIC *****************/
 /*
 Sets up the wordpress filters and config pages.  
 
-There are two kinds of filters: one for plaintext e-mails and another for explicit e-mail links.  Naturally, the latter must be run first (priority 11 by default), or the e-mail detector will corrupt our links.
+There are two kinds of filters: one for plaintext e-mails and another
+for explicit e-mail links.  Naturally, the latter must be run first
+(priority 31 by default), or the e-mail detector will corrupt our
+links.
 */
 
 add_option('enkode_pt',  1, 'Enkode plaintext e-mail addresses.');
@@ -97,7 +119,9 @@ function enkoder_conf() {
 <input id="enk_rss1" name="enk_rss" value="1" type="radio" <?php checked(1, intval(get_option('enkode_rss'))); ?>>&nbsp;<label for="enk_rss1">Hide e-mails in RSS (using the message below)</label><br />
 <input id="enk_rss0" name="enk_rss" value="0" type="radio" <?php checked(0, intval(get_option('enkode_rss'))); ?>>&nbsp;<label for="enk_rss0">Do not enkode in RSS (make spammers happy!)</label><br />
 </fieldset>
-<p><label for="enk_msg">Message for non-JavaScript-capable browsers</label><input id="enk_msg" name="enk_msg" type="text" size="60" value="<?php echo get_option('enkode_msg'); ?>" /></p>
+<p>
+<label for="enk_msg">Message for non-JavaScript-capable browsers</label><input id="enk_msg" name="enk_msg" type="text" size="60" value="<?php echo get_option('enkode_msg'); ?>" /></p>
+
 <p class="submit"><input type="submit" name="submit" value="<?php _e('Update Options &raquo;'); ?>" /></p>
 </form>
 </div>
@@ -124,7 +148,7 @@ function enk_email_to_link($matches) {
 
 function enk_hide_link($matches) {
 	$text = enk_extract_linktext($matches[1]);
-	return enk_noscript(enkode($matches[1]), $text);
+	return enkode($matches[1], $text);
 }
 
 function enk_mailto_to_linktext($matches) {
@@ -133,7 +157,8 @@ function enk_mailto_to_linktext($matches) {
 
 /* enkode_plaintext_emails($text)
 
-Encodes all plaintext e-mails into a JavaScript-obscured mailto; the text of the mailto is the e-mail address itself.
+Encodes all plaintext e-mails into a JavaScript-obscured mailto; the
+text of the mailto is the e-mail address itself.
 */
 function enkode_plaintext_emails($text) {
 	return preg_replace_callback(PTEXT_EMAIL, 'enk_email_to_link', $text);
@@ -213,30 +238,29 @@ function enkode_mailto($email, $text, $subject = "", $title = "") {
 
 	$content .= ">$text</a>";
 
-	return enk_noscript(enkode($content), $text);
+	return enkode($content);
 }
 
-function enk_noscript($enkoded, $text) {
-	/* we don't want to print an e-mail plaintext! */
-	if (strstr($text, "@")) {
-		$text = "";
-	} else {
-		$text .= ' ';
-	}
+/* enkode($content, $text = NULL, $max_passes = 20, $max_length = 1024)
 
-	$noscript = "<noscript>$text(" . get_option('enkode_msg') . ")</noscript>";
+Encodes a string to be view-time written by obfuscated Javascript.
+The max passes parameter is a tight bound on the number of encodings
+perormed.  The max length paramater is a loose bound on the length of
+the generated Javascript.  Setting it to 0 will use a single pass of
+enk_enc_num.
 
-	return $enkoded . $noscript;
-}
+The function works by selecting encodings at random from the array
+enkodings, applying them to the given string, and then producing
+Javascript to decode.  The Javascript works by recursive evaluation,
+which should be nasty enough to stop anything but the most determined
+spambots.
 
-/* enkode($content, $max_passes = 20, $max_length = 1024)
-
-Encodes a string to be view-time written by obfuscated Javascript.  The max passes parameter is a tight bound on the number of encodings perormed.  The max length paramater is a loose bound on the length of the generated Javascript.  Setting it to 0 will use a single randomly chosen pass of encoding.
-
-The function works by selecting encodings at random from the array enkodings, applying them to the given string, and then producing Javascript to decode.  The Javascript works by recursive evaluation, which should be nasty enough to stop anything but the most determined spambots.
-
+The text parameter, if set, overrides the user-settable option
+enk_msg.  This is the message overwritten by the JavaScript; if a
+browser doesn't support JavaScript, this message will be shown to the
+user.
 */
-function enkode($content, $max_passes = 20, $max_length = 1024) {
+function enkode($content, $text = NULL, $max_passes = 20, $max_length = 1024) {
 	global $enkodings, $enk_dec_num;
 
 	/* our base case -- we'll eventually evaluate this code */
@@ -260,10 +284,11 @@ function enkode($content, $max_passes = 20, $max_length = 1024) {
 		$kode = enkode_pass($kode, $enc, $dec);
 	}
 
-	/* mandatory numerical encoding, prevents catching @ signs and interpreting neighboring characters as e-mail addresses */
+	/* mandatory numerical encoding, prevents catching @ signs and
+	   interpreting neighboring characters as e-mail addresses */
 	$kode = enkode_pass($kode, 'enk_enc_num', $enk_dec_num);
 
-	return enk_build_js($kode);
+	return enk_build_js($kode, $text);
 }
 
 /* enkode_pass($kode, $enc, $dec)
@@ -282,22 +307,30 @@ function enkode_pass($kode, $enc, $dec) {
 
 /* enk_build_js($kode)
 
-Generates the Javascript recursive evaluator, which is 157 characters of boilerplate code.
+Generates the Javascript recursive evaluator, which is 269 characters
+of boilerplate code.
 
+Unfortunately, <noscript> can't be used arbitrarily in XHTML.  A
+<span> that we immediately overwrite, serves as an ad hoc <noscript>
+tag.
 */
-define('JS_LEN', 169);
-function enk_build_js($kode) {
+define('JS_LEN', 269);
+function enk_build_js($kode, $text = NULL) {
 	$clean = addslashes($kode);
 
-	$msg = get_option('enkode_msg');
+	$msg = is_null($text) ? get_option('enkode_msg') : $text;
 
+	$span = "enkoder_" . rand();
 	$js = <<<EOT
+<span id="$span">$msg</span>
 <script type="text/javascript">
-/* $msg <!-- */
+/* <!-- */
 function hivelogic_enkoder() {
 var kode="$clean";var i,c,x;while(eval(kode));
 }
-hivelogic_enkoder()
+hivelogic_enkoder();
+var span = document.getElementById('$span');
+span.parentNode.removeChild(span);
 /* --> */
 </script>
 EOT;
@@ -307,7 +340,10 @@ EOT;
 
 /* ENCODINGS ***********************/
 /* 
-Each encoding should consist of a function and a Javascript string; the function performs some scrambling of a string, and the Javascript unscrambles that string (assuming that it's stored in a variable kode).  The listed enkodings are those used in the Hivelogic Enkoder.
+Each encoding should consist of a function and a Javascript string;
+the function performs some scrambling of a string, and the Javascript
+unscrambles that string (assuming that it's stored in a variable
+kode).  The listed enkodings are those used in the Hivelogic Enkoder.
 */
 
 /* REVERSE ENCODING */
@@ -320,7 +356,8 @@ kode=kode.split('').reverse().join('')
 EOT;
 
 /* SHIFT ENCODING */
-/* This is buggy -- javascript bugs out when some weird characters are included.  For this reason, enk_enc_num is written below. */
+/* This is buggy -- javascript bugs out when some weird characters are
+   included.  For this reason, enk_enc_num is written below. */
 /*
 function enk_enc_shift($s) {
 	$shifted = strval($s);
@@ -377,7 +414,8 @@ EOT;
 
 /* ENCODING LIST *******************/
 /*
-Listed fully below.  Add in this format to get new phases, which will be used automatically.
+Listed fully below.  Add in this format to get new phases, which will
+be used automatically by the enkode function.
 */
 
 $enkodings = array(
