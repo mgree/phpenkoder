@@ -7,7 +7,7 @@ href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on
 Rails TextHelper module.  Hat tip: Dan Benjamin for the original Ruby
 code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.3
+Version: 1.4
 Author URI: http://www.weaselhat.com/
 */
 
@@ -322,8 +322,7 @@ function enk_build_js($kode, $text = NULL) {
 
 	$span = "enkoder_" . rand();
 	$js = <<<EOT
-<span id="$span">$msg</span>
-<script type="text/javascript">
+<span id="$span">$msg</span><script type="text/javascript">
 /* <!-- */
 function hivelogic_enkoder() {
 var kode="$clean";var i,c,x;while(eval(kode));
