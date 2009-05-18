@@ -28,7 +28,7 @@ implemented.
 
 == Installation ==
 
-1. Upload `enkoder.php` to the `/wordpress//wp-content/plugins/` directory
+1. Upload `enkoder.php` to the `/wordpress/wp-content/plugins/` directory
 Or:
 1. Extract `enkoder-major.minor.{zip,tgz}` in the `/wordpress/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
