@@ -7,7 +7,7 @@ href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on
 Rails TextHelper module.  Hat tip: Dan Benjamin for the original Ruby
 code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.4
+Version: 1.5
 Author URI: http://www.weaselhat.com/
 */
 
@@ -87,8 +87,9 @@ add_action('admin_menu', 'enkoder_config_page');
 function enkoder_config_page() {
         if (function_exists('add_options_page')) {
                 add_options_page(__('PHPEnkoder'),
-                                 __('PHPEnkoder'), 1, 
-				 basename(__FILE__),
+                                 __('PHPEnkoder'), 
+                                 'manage_options', 
+                                 basename(__FILE__),
                                  'enkoder_conf');
 	}
 }

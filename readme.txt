@@ -1,10 +1,10 @@
 === PHPEnkoder ===
 Contributors: michael_greenberg
 Donate link: http://www.weaselhat.com/phpenkoder/
-Tags: spam, mailto, email, e-mail, encrypt, javascript, enkoder, hide, crawl, link, encode, encoder, enkode, mail
+Tags: spam, mailto, email, e-mail, encrypt, javascript, enkoder, hide, crawl, link, encode, encoder, enkode, mail, spambot, human, address, safe, plaintext, hidden
 Requires at least: 2.0
-Tested up to: 2.7
-Stable tag: 1.4
+Tested up to: 2.7.1
+Stable tag: 1.5
 
 Encodes mailto: links and e-mail addresses with JavaScript to stifle
 webcrawlers.  Automatically turns plaintext e-mails into (enkoded)
@@ -12,9 +12,10 @@ links.
 
 == Description ==
 
-PHPEnkoder is a port of the excellent Hivelogic Enkoder to PHP and,
-more specifically, to Wordpress. It is used to display text in a way
-that users can see and bots can't.
+PHPEnkoder is a port of the excellent [Hivelogic
+Enkoder](http://hivelogic.com/enkoder) to PHP and, more specifically,
+to Wordpress. It is used to display text in a way that users can see
+and bots can't.
 
 The encoding system is directly and unabashedly stolen from the
 BSD-licensed source of Hivelogic Enkoder, which works by randomly
@@ -28,9 +29,12 @@ implemented.
 
 == Installation ==
 
-1. Upload `enkoder.php` to the `/wordpress/wp-content/plugins/` directory
-Or:
-1. Extract `enkoder-major.minor.{zip,tgz}` in the `/wordpress/` directory
+1. Either: 
+  * Download and extract `phpenkoder.1.5.zip` from the plugin
+    directory and upload `enkoder.php` to the
+    `/wordpress/wp-content/plugins/` directory, or
+  * Download `enkoder-1.5.{zip,tgz}` from the PHPEnkoder website and
+    extract it in the `/wordpress/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Configure the plugin through its menu in `Settings`
 
