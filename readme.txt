@@ -22,10 +22,10 @@ BSD-licensed source of Hivelogic Enkoder, which works by randomly
 encoding a piece of text and sending to the browser self-evaluating
 Javascript that will generate the original text. This works in two
 ways: first, a bot must first have a fairly complete Javascript
-implementation; second, the decoding process can be made arbitrarily
-computationally intensive. This is similar to the idea of charging
-computational payments to send e-mail, only this is actually
-implemented.
+implementation (in particular, it must have `eval`); second, the
+decoding process can be made arbitrarily computationally
+intensive. This is similar to the idea of charging computational
+payments to send e-mail, only this is actually implemented.
 
 == Installation ==
 
