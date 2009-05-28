@@ -1,7 +1,7 @@
 === PHPEnkoder ===
 Contributors: michael_greenberg
 Donate link: http://www.weaselhat.com/phpenkoder/
-Tags: spam, mailto, email, e-mail, encrypt, javascript, enkoder, hide, crawl, link, encode, encoder, enkode, mail, spambot, human, address, addresses, safe, plaintext, hidden, obfuscate, obfuscator, hider
+Tags: spam, bot, robot, crawler, harvest, mailto, email, e-mail, encrypt, javascript, js, enkoder, hide, crawl, link, encode, encoder, encoding, enkode, mail, spambot, human, address, addresses, safe, plaintext, hidden, obfuscate, obfuscator, hider, anti-spam, hivelogic
 Requires at least: 2.0
 Tested up to: 2.7.1
 Stable tag: 1.5
