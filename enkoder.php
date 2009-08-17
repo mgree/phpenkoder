@@ -178,45 +178,58 @@ function enk_hide_emails($text) {
 	return preg_replace(PTEXT_EMAIL, '(' . get_option("enkode_msg") . ')', $text);
 }
 
-function enkoder_register_filters($hook, $filters = array('enkode_plaintext_emails', 'enkode_mailtos')) {
+function enkoder_manage_multi($hook, $action = 'add_filter', $filters = array('enkode_plaintext_emails', 'enkode_mailtos')) {
 	global $enkoder_mailto_priority, $enkoder_plaintext_priority;
 
 	if (get_option('enkode_mt'))
-		add_filter($hook, $filters[1], $enkoder_mailto_priority);
+		$action($hook, $filters[1], $enkoder_mailto_priority);
 
 	if (get_option('enkode_pt'))
-		add_filter($hook, $filters[0], $enkoder_plaintext_priority);
+		$action($hook, $filters[0], $enkoder_plaintext_priority);
 }
 
-function enkoder_register_single($hook, $filter = 'enk_hide_emails') {
+function enkoder_manage_single($hook, $action = 'add_filter', $filter = 'enk_hide_emails') {
 	global $enkoder_plaintext_priority;
 
 	if (get_option('enkode_pt') || get_option('enkode_mt'))
-		add_filter($hook, $filter, $enkoder_plaintext_priority);
+		$action($hook, $filter, $enkoder_plaintext_priority);
 }
 
-/* actually set up the filters */
-function enkoder_setup_filters() {
+/* actually set up the filters 
+
+   note that this procedure is paramaterized over the action.
+   to set up, pass in 'add_action'.  to tear down, pass in 'remove_action'
+*/
+function enkoder_manage_filters($action) {
+	$content_hook = array('the_content', 'get_comment_text');
+
 	/* set up standard content filters */
-	$content_hook = array('the_content', 'comment_text');
 	foreach ($content_hook as $hook) {
-		enkoder_register_filters($hook);
+		enkoder_manage_multi($hook, $action);
 	}
 
 	/* set up RSS filters */
 	$rss_hook = array('the_content_rss', 'comment_rss', 'the_excerpt_rss');
 	$conf_enk_rss = intval(get_option('enkode_rss'));
-	if      ($conf_enk_rss == 2) $reg_rss = 'enkoder_register_filters';
-	else if ($conf_enk_rss == 1) $reg_rss = 'enkoder_register_single';
+	if      ($conf_enk_rss == 2) $reg_rss = 'enkoder_manage_multi';
+	else if ($conf_enk_rss == 1) $reg_rss = 'enkoder_manage_single';
 
 	if (isset($reg_rss)) {
 		foreach ($rss_hook as $hook) {
-			$reg_rss($hook);
+			$reg_rss($hook, $action);
 		}
 	}
 }
 
-enkoder_setup_filters();
+/* actually set up the filters */
+enkoder_manage_filters('add_filter');
+
+/* ...but don't filter admin pages! */
+function enkoder_unregister_filters() {
+	enkoder_manage_filters('remove_filter');
+}
+
+add_action('admin_init', 'enkoder_unregister_filters');
 
 /* ENCODING ************************/
 
@@ -312,21 +325,24 @@ Unfortunately, <noscript> can't be used arbitrarily in XHTML.  A
 <span> that we immediately overwrite, serves as an ad hoc <noscript>
 tag.
 */
+$enkoder_uses = 0;
 define('JS_LEN', 269);
 function enk_build_js($kode, $text = NULL) {
+	global $enkoder_uses;
 	$clean = addslashes($kode);
 
 	$msg = is_null($text) ? get_option('enkode_msg') : $text;
 
-	$span = "enkoder_" . rand();
+	$name = "enkoder_" . strval($enkoder_uses) . "_" . strval(rand());
+	$enkoder_uses += 1;
 	$js = <<<EOT
-<span id="$span">$msg</span><script type="text/javascript">
+<span id="$name">$msg</span><script type="text/javascript">
 /* <!-- */
-function hivelogic_enkoder() {
+function hivelogic_$name() {
 var kode="$clean";var i,c,x;while(eval(kode));
 }
-hivelogic_enkoder();
-var span = document.getElementById('$span');
+hivelogic_$name();
+var span = document.getElementById('$name');
 span.parentNode.removeChild(span);
 /* --> */
 </script>
