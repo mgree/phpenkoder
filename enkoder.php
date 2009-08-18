@@ -2,9 +2,9 @@
 /*
 Plugin Name: PHPEnkoder
 Plugin URI: http://www.weaselhat.com/phpenkoder/
-Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module.  Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
+Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module.  Automatically scrambles e-mails in plaintext and mailtos; adds the <tt>[enkode]...[/enkode]</tt> shortcode to allow for arbitrary use.  Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.5
+Version: 1.6
 Author URI: http://www.weaselhat.com/
 */
 
@@ -17,19 +17,18 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-	1. Redistributions of source code must retain the above
-	copyright notice, this list of conditions and the following
-	disclaimer.
+  1. Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
 
-	2. Redistributions in binary form must reproduce the above
-	copyright notice, this list of conditions and the following
-	disclaimer in the documentation and/or other materials
-	provided with the distribution.
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
+     the documentation and/or other materials provided with the
+     distribution.
 
-	3. Neither the name of Michael Greenberg, AUTOMATIC CORP. nor
-        the names of its contributors may be used to endorse or
-        promote products derived from this software without specific
-        prior written permission.
+  3. Neither the name of Michael Greenberg, AUTOMATIC CORP. nor the
+     names of its contributors may be used to endorse or promote
+     products derived from this software without specific prior
+     written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -63,6 +62,9 @@ enkoder_ are for plugin setup; and those with enk_ are intended to be
 private.
 */
 
+define(MAX_PASSES, 20);
+define(MAX_LENGTH, 1024);
+
 /* WORDPRESS LOGIC *****************/
 /*
 Sets up the wordpress filters and config pages.  
@@ -82,27 +84,27 @@ add_option('enkode_msg', "email hidden; JavaScript is required", "Message to dis
 add_action('admin_menu', 'enkoder_config_page');
 
 function enkoder_config_page() {
-        if (function_exists('add_options_page')) {
-                add_options_page(__('PHPEnkoder'),
-                                 __('PHPEnkoder'), 
-                                 'manage_options', 
-                                 basename(__FILE__),
-                                 'enkoder_conf');
-	}
+  if (function_exists('add_options_page')) {
+    add_options_page(__('PHPEnkoder'),
+                     __('PHPEnkoder'), 
+                     'manage_options', 
+                     basename(__FILE__),
+                     'enkoder_conf');
+  }
 }
 
 function enkoder_conf() {
-        if ( isset($_POST['submit']) ) {
-                check_admin_referer();
-		update_option('enkode_pt',  $_POST['enk_pt'] == 'on');
-		update_option('enkode_mt',  $_POST['enk_mt'] == 'on');
-		update_option('enkode_rss', intval($_POST['enk_rss']));
-		update_option('enkode_msg', $_POST['enk_msg']); /* magic quotes better be on... */
-	}
+  if ( isset($_POST['submit']) ) {
+    check_admin_referer();
+    update_option('enkode_pt',  $_POST['enk_pt'] == 'on');
+    update_option('enkode_mt',  $_POST['enk_mt'] == 'on');
+    update_option('enkode_rss', intval($_POST['enk_rss']));
+    update_option('enkode_msg', $_POST['enk_msg']); /* magic quotes better be on... */
+  }
 ?>
 <div class="wrap">
 <h2><?php _e('PHPEnkoder Configuration'); ?></h2>
-	<p><?php _e('PHPEnkoder should put a stop to e-mail crawling.  But if you like spam, feel free to disable some of its protection.  Perhaps you only want to manually enkode a few things?'); ?></p>
+<p><?php _e('PHPEnkoder should put a stop to e-mail crawling.  But if you like spam, feel free to disable some of its protection.  Perhaps you only want to manually enkode a few things?'); ?></p>
 
 <form action="" method="post" id="phpenkoder-conf" style="margin: auto; width: 25em; ">
 <fieldset>
@@ -136,21 +138,21 @@ define("MAILTO_EMAIL", '#(<a.*?href="mailto:' . EMAIL_REGEX . '.*?>.*?</a>)#i');
 define("LINK_TEXT", "/>(.*?)</");
 
 function enk_extract_linktext($text) {
-	preg_match(LINK_TEXT, $text, $tmatches);
-	return $tmatches[1];
+  preg_match(LINK_TEXT, $text, $tmatches);
+  return $tmatches[1];
 }
 
 function enk_email_to_link($matches) {
-	return enkode_mailto($matches[1], $matches[1]);
+  return enkode_mailto($matches[1], $matches[1]);
 }
 
 function enk_hide_link($matches) {
-	$text = enk_extract_linktext($matches[1]);
-	return enkode($matches[1], $text);
+  $text = enk_extract_linktext($matches[1]);
+  return enkode($matches[1], $text);
 }
 
 function enk_mailto_to_linktext($matches) {
-	return enk_extract_linktext($matches[1]);
+  return enk_extract_linktext($matches[1]);
 }
 
 /* enkode_plaintext_emails($text)
@@ -159,7 +161,7 @@ Encodes all plaintext e-mails into a JavaScript-obscured mailto; the
 text of the mailto is the e-mail address itself.
 */
 function enkode_plaintext_emails($text) {
-	return preg_replace_callback(PTEXT_EMAIL, 'enk_email_to_link', $text);
+  return preg_replace_callback(PTEXT_EMAIL, 'enk_email_to_link', $text);
 }
 
 /* enkode_mailtos($text)
@@ -167,32 +169,32 @@ function enkode_plaintext_emails($text) {
 Encodes all mailto links into JavaScript obscured text.
 */
 function enkode_mailtos($text) {
-	return preg_replace_callback(MAILTO_EMAIL, 'enk_hide_link', $text);
+  return preg_replace_callback(MAILTO_EMAIL, 'enk_hide_link', $text);
 }
 
 /* used for RSS */
 function enk_hide_emails($text) {
-	$text = preg_replace_callback(MAILTO_EMAIL, 'enk_mailto_to_linktext', $text);
+  $text = preg_replace_callback(MAILTO_EMAIL, 'enk_mailto_to_linktext', $text);
 
-	/* make sure there's no e-mail in the link! */
-	return preg_replace(PTEXT_EMAIL, '(' . get_option("enkode_msg") . ')', $text);
+  /* make sure there's no e-mail in the link! */
+  return preg_replace(PTEXT_EMAIL, '(' . get_option("enkode_msg") . ')', $text);
 }
 
 function enkoder_manage_multi($hook, $action = 'add_filter', $filters = array('enkode_plaintext_emails', 'enkode_mailtos')) {
-	global $enkoder_mailto_priority, $enkoder_plaintext_priority;
-
-	if (get_option('enkode_mt'))
-		$action($hook, $filters[1], $enkoder_mailto_priority);
-
-	if (get_option('enkode_pt'))
-		$action($hook, $filters[0], $enkoder_plaintext_priority);
+  global $enkoder_mailto_priority, $enkoder_plaintext_priority;
+  
+  if (get_option('enkode_mt'))
+    $action($hook, $filters[1], $enkoder_mailto_priority);
+  
+  if (get_option('enkode_pt'))
+    $action($hook, $filters[0], $enkoder_plaintext_priority);
 }
 
 function enkoder_manage_single($hook, $action = 'add_filter', $filter = 'enk_hide_emails') {
-	global $enkoder_plaintext_priority;
-
-	if (get_option('enkode_pt') || get_option('enkode_mt'))
-		$action($hook, $filter, $enkoder_plaintext_priority);
+  global $enkoder_plaintext_priority;
+  
+  if (get_option('enkode_pt') || get_option('enkode_mt'))
+    $action($hook, $filter, $enkoder_plaintext_priority);
 }
 
 /* actually set up the filters 
@@ -201,24 +203,24 @@ function enkoder_manage_single($hook, $action = 'add_filter', $filter = 'enk_hid
    to set up, pass in 'add_action'.  to tear down, pass in 'remove_action'
 */
 function enkoder_manage_filters($action) {
-	$content_hook = array('the_content', 'get_comment_text');
+  $content_hook = array('the_content', 'get_comment_text');
+  
+  /* set up standard content filters */
+  foreach ($content_hook as $hook) {
+    enkoder_manage_multi($hook, $action);
+  }
 
-	/* set up standard content filters */
-	foreach ($content_hook as $hook) {
-		enkoder_manage_multi($hook, $action);
-	}
-
-	/* set up RSS filters */
-	$rss_hook = array('the_content_rss', 'comment_rss', 'the_excerpt_rss');
-	$conf_enk_rss = intval(get_option('enkode_rss'));
-	if      ($conf_enk_rss == 2) $reg_rss = 'enkoder_manage_multi';
-	else if ($conf_enk_rss == 1) $reg_rss = 'enkoder_manage_single';
-
-	if (isset($reg_rss)) {
-		foreach ($rss_hook as $hook) {
-			$reg_rss($hook, $action);
-		}
-	}
+  /* set up RSS filters */
+  $rss_hook = array('the_content_rss', 'comment_rss', 'the_excerpt_rss');
+  $conf_enk_rss = intval(get_option('enkode_rss'));
+  if      ($conf_enk_rss == 2) $reg_rss = 'enkoder_manage_multi';
+  else if ($conf_enk_rss == 1) $reg_rss = 'enkoder_manage_single';
+  
+  if (isset($reg_rss)) {
+    foreach ($rss_hook as $hook) {
+      $reg_rss($hook, $action);
+    }
+  }
 }
 
 /* actually set up the filters */
@@ -226,10 +228,26 @@ enkoder_manage_filters('add_filter');
 
 /* ...but don't filter admin pages! */
 function enkoder_unregister_filters() {
-	enkoder_manage_filters('remove_filter');
+  enkoder_manage_filters('remove_filter');
 }
 
 add_action('admin_init', 'enkoder_unregister_filters');
+
+/* shortcode support */
+function enk_shortcode_handler($atts, $content = NULL) {
+  if (is_null($content)) return '';
+
+  $opts = shortcode_atts(array('text'   => get_option("enkode_msg"),
+                               'passes' => MAX_PASSES,
+                               'length' => MAX_LENGTH),
+                         $atts);
+
+  return enkode(do_shortcode($content), $opts['text'], $opts['passes'], $opts['length']);
+}
+
+/* actually set up shortcode */
+add_shortcode('enkode', 'enk_shortcode_handler');
+
 
 /* ENCODING ************************/
 
@@ -239,17 +257,17 @@ Encodes a mailto link.
 
 */
 function enkode_mailto($email, $text, $subject = "", $title = "") {
-	$content = '<a href="mailto:' . $email;
-
-	if ($subject) $content .= "?subject=$subject";
-
-	$content .= '"';
-
-	if ($title) $content .= " title=\"$title\"";
-
-	$content .= ">$text</a>";
-
-	return enkode($content);
+  $content = '<a href="mailto:' . $email;
+  
+  if ($subject) $content .= "?subject=$subject";
+  
+  $content .= '"';
+  
+  if ($title) $content .= " title=\"$title\"";
+  
+  $content .= ">$text</a>";
+  
+  return enkode($content);
 }
 
 /* enkode($content, $text = NULL, $max_passes = 20, $max_length = 1024)
@@ -271,35 +289,35 @@ enk_msg.  This is the message overwritten by the JavaScript; if a
 browser doesn't support JavaScript, this message will be shown to the
 user.
 */
-function enkode($content, $text = NULL, $max_passes = 20, $max_length = 1024) {
-	global $enkodings, $enk_dec_num;
+function enkode($content, $text = NULL, $max_passes = MAX_PASSES, $max_length = MAX_LENGTH) {
+  global $enkodings, $enk_dec_num;
 
-	/* our base case -- we'll eventually evaluate this code */
-	$kode = "document.write(\"" . 
-		addslashes($content) .
-                "\");";
+  /* our base case -- we'll eventually evaluate this code */
+  $kode = "document.write(\"" . 
+    addslashes($content) .
+    "\");";
 
-	$max_length = max($max_length, strlen($kode) + JS_LEN + 1);
+  $max_length = max($max_length, strlen($kode) + JS_LEN + 1);
+  
+  $result = "";
+  
+  /* build up as many encodings as we can */
+  for ($passes = 0;
+       $passes < $max_passes && strlen($kode) < $max_length;
+       $passes++) {
+    /* pick an encoding at random */
+    $idx = rand(0, count($enkodings) - 1);
+    $enc = $enkodings[$idx][0];
+    $dec = $enkodings[$idx][1];
+    
+    $kode = enkode_pass($kode, $enc, $dec);
+  }
 
-	$result = "";
-
-	/* build up as many encodings as we can */
-	for ($passes = 0;
-	     $passes < $max_passes && strlen($kode) < $max_length;
-             $passes++) {
-		/* pick an encoding at random */
-		$idx = rand(0, count($enkodings) - 1);
-		$enc = $enkodings[$idx][0];
-		$dec = $enkodings[$idx][1];
-
-		$kode = enkode_pass($kode, $enc, $dec);
-	}
-
-	/* mandatory numerical encoding, prevents catching @ signs and
-	   interpreting neighboring characters as e-mail addresses */
-	$kode = enkode_pass($kode, 'enk_enc_num', $enk_dec_num);
-
-	return enk_build_js($kode, $text);
+  /* mandatory numerical encoding, prevents catching @ signs and
+     interpreting neighboring characters as e-mail addresses */
+  $kode = enkode_pass($kode, 'enk_enc_num', $enk_dec_num);
+  
+  return enk_build_js($kode, $text);
 }
 
 /* enkode_pass($kode, $enc, $dec)
@@ -307,13 +325,13 @@ function enkode($content, $text = NULL, $max_passes = 20, $max_length = 1024) {
 Encodes a single pass.  $enc is a function pointer and $dec is the Javascript.
 */
 function enkode_pass($kode, $enc, $dec) {
-	/* first encode */
-	$kode = addslashes($enc($kode));
+  /* first encode */
+  $kode = addslashes($enc($kode));
 
-	/* then generate encoded code with decoding afterwards */
-	$kode = "kode=\"$kode\";$dec;"; 
+  /* then generate encoded code with decoding afterwards */
+  $kode = "kode=\"$kode\";$dec;"; 
 
-	return $kode;
+  return $kode;
 }
 
 /* enk_build_js($kode)
@@ -328,14 +346,14 @@ tag.
 $enkoder_uses = 0;
 define('JS_LEN', 269);
 function enk_build_js($kode, $text = NULL) {
-	global $enkoder_uses;
-	$clean = addslashes($kode);
-
-	$msg = is_null($text) ? get_option('enkode_msg') : $text;
-
-	$name = "enkoder_" . strval($enkoder_uses) . "_" . strval(rand());
-	$enkoder_uses += 1;
-	$js = <<<EOT
+  global $enkoder_uses;
+  $clean = addslashes($kode);
+  
+  $msg = is_null($text) ? get_option('enkode_msg') : $text;
+  
+  $name = "enkoder_" . strval($enkoder_uses) . "_" . strval(rand());
+  $enkoder_uses += 1;
+  $js = <<<EOT
 <span id="$name">$msg</span><script type="text/javascript">
 /* <!-- */
 function hivelogic_$name() {
@@ -348,20 +366,20 @@ span.parentNode.removeChild(span);
 </script>
 EOT;
 
-	return $js;
+return $js;
 }
 
 /* ENCODINGS ***********************/
 /* 
-Each encoding should consist of a function and a Javascript string;
-the function performs some scrambling of a string, and the Javascript
-unscrambles that string (assuming that it's stored in a variable
-kode).  The listed enkodings are those used in the Hivelogic Enkoder.
+   Each encoding should consist of a function and a Javascript string;
+   the function performs some scrambling of a string, and the Javascript
+   unscrambles that string (assuming that it's stored in a variable
+   kode).  The listed enkodings are those used in the Hivelogic Enkoder.
 */
 
 /* REVERSE ENCODING */
 function enk_enc_reverse($s) {
-	return strrev($s);
+  return strrev($s);
 }
 
 $enk_dec_reverse = <<<EOT
@@ -373,16 +391,16 @@ EOT;
    included.  For this reason, enk_enc_num is written below. */
 /*
 function enk_enc_shift($s) {
-	$shifted = strval($s);
+  $shifted = strval($s);
 
-	$len = strlen($s);
-	for ($i = 0;$i < $len;$i++) {
-		$b = ord($s[$i]) + 3;
-		if ($b > 127) { $b -= 128; }
-		$shifted[$i] = chr($b);
-	}
+  $len = strlen($s);
+  for ($i = 0;$i < $len;$i++) {
+    $b = ord($s[$i]) + 3;
+    if ($b > 127) { $b -= 128; }
+    $shifted[$i] = chr($b);
+  }
 
-	return $shifted;
+  return $shifted;
 }
 
 $enk_dec_shift = <<<EOT
@@ -392,15 +410,15 @@ EOT;
 
 /* NUM ENCODING (adapted)*/
 function enk_enc_num($s) {
-	$nums = "";
-
-	$len = strlen($s);
-	for ($i = 0;$i < $len;$i++) {
-		$nums .= strval(ord($s[$i]) + 3);
-		if ($i < $len - 1) { $nums .= ' '; } /* pwned lol rotfl!!!11 */
-	}
-
-	return $nums;
+  $nums = "";
+  
+  $len = strlen($s);
+  for ($i = 0;$i < $len;$i++) {
+    $nums .= strval(ord($s[$i]) + 3);
+    if ($i < $len - 1) { $nums .= ' '; } /* pwned lol rotfl!!!11 */
+  }
+  
+  return $nums;
 }
 
 $enk_dec_num = <<<EOT
@@ -409,16 +427,16 @@ EOT;
 
 /* SWAP ENCODING */
 function enk_enc_swap($s) {
-	$swapped = strval($s);
-
-	$len = strlen($s);
-	for ($i = 0;$i < $len - 1;$i += 2) {
-		$tmp = $swapped[$i + 1];
-		$swapped[$i + 1] = $swapped[$i];
-		$swapped[$i] = $tmp; /* 'fuck' is written here so you can grep for it */
-	}
-
-	return $swapped;
+  $swapped = strval($s);
+  
+  $len = strlen($s);
+  for ($i = 0;$i < $len - 1;$i += 2) {
+    $tmp = $swapped[$i + 1];
+    $swapped[$i + 1] = $swapped[$i];
+    $swapped[$i] = $tmp; /* 'fuck' is written here so you can grep for it */
+  }
+  
+  return $swapped;
 }
 
 $enk_dec_swap = <<<EOT
