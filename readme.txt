@@ -1,14 +1,15 @@
 === PHPEnkoder ===
 Contributors: michael_greenberg
 Donate link: http://www.weaselhat.com/phpenkoder/
-Tags: spam, mailto, email, e-mail, encrypt, javascript, enkoder, hide, crawl, link, encode, encoder, enkode, mail, spambot, human, address, addresses, safe, plaintext, hidden, obfuscate, obfuscator, hider
+Tags: spam, bot, robot, crawler, harvest, mailto, email, e-mail, encrypt, javascript, js, enkoder, hide, crawl, link, encode, encoder, encoding, enkode, mail, spambot, human, address, addresses, safe, plaintext, hidden, obfuscate, obfuscator, hider, anti-spam, hivelogic, shortcode, anti-spam
 Requires at least: 2.0
-Tested up to: 2.7.1
-Stable tag: 1.5
+Tested up to: 2.8.4
+Stable tag: 1.6
 
 Encodes mailto: links and e-mail addresses with JavaScript to stifle
 webcrawlers.  Automatically turns plaintext e-mails into (enkoded)
-links.
+links.  Adds the `[enkode]...[/enkode]` shortcode to allow for
+arbitrary use.
 
 == Description ==
 
@@ -26,6 +27,11 @@ implementation (in particular, it must have `eval`); second, the
 decoding process can be made arbitrarily computationally
 intensive. This is similar to the idea of charging computational
 payments to send e-mail, only this is actually implemented.
+
+By default, PHPEnkoder scrambles e-mails in plaintext and in `mailto:`
+links.  It additionally provides a shortcode for manual scrambling,
+used like so: `[enkode text="shown to non-JS browsers"]this will be
+scrambled[/enkode]`.
 
 == Installation ==
 
