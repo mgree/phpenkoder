@@ -4,7 +4,7 @@ Plugin Name: PHPEnkoder
 Plugin URI: http://www.weaselhat.com/phpenkoder/
 Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module.  Automatically scrambles e-mails in plaintext and mailtos; adds the <tt>[enkode]...[/enkode]</tt> shortcode to allow for arbitrary use.  Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.6
+Version: 1.7
 Author URI: http://www.weaselhat.com/
 */
 
@@ -79,6 +79,7 @@ add_option('enkode_pt',  1, 'Enkode plaintext e-mail addresses.');
 add_option('enkode_mt',  1, 'Enkode mailto: e-mail addresses.');
 add_option('enkode_rss', 1, '0 => don\'t enkode in RSS, 1 => hide in RSS, 2 => enkode in RSS.');
 add_option('enkode_msg', "email hidden; JavaScript is required", "Message to display to non-JavaScript-capable browers (and on RSS).");
+add_option('enkode_class', '', 'Class attribute to use on generated mailto: tags');
 
 /* config stuff unabashedly stolen from akismet */
 add_action('admin_menu', 'enkoder_config_page');
@@ -100,6 +101,7 @@ function enkoder_conf() {
     update_option('enkode_mt',  $_POST['enk_mt'] == 'on');
     update_option('enkode_rss', intval($_POST['enk_rss']));
     update_option('enkode_msg', $_POST['enk_msg']); /* magic quotes better be on... */
+    update_option('enkode_class', $_POST['enk_class']);
   }
 ?>
 <div class="wrap">
@@ -121,7 +123,8 @@ function enkoder_conf() {
 </fieldset>
 <p>
 <label for="enk_msg">Message for non-JavaScript-capable browsers</label><input id="enk_msg" name="enk_msg" type="text" size="60" value="<?php echo get_option('enkode_msg'); ?>" /></p>
-
+<p>
+<label for="enk_class">Class attribute for generated <tt>mailto:</tt> links</label><input id="enk_class" name="enk_class" type="text" size="60" value="<?php echo get_option('enkode_class'); ?>" /></p>
 <p class="submit"><input type="submit" name="submit" value="<?php _e('Update Options &raquo;'); ?>" /></p>
 </form>
 </div>
@@ -257,7 +260,12 @@ Encodes a mailto link.
 
 */
 function enkode_mailto($email, $text, $subject = "", $title = "") {
-  $content = '<a href="mailto:' . $email;
+  $content = '<a ';
+
+  $cls = get_option('enkode_class');
+  if ($cls) $content .= "class='".$cls."' ";
+
+  $content .= 'href="mailto:' . $email;
   
   if ($subject) $content .= "?subject=$subject";
   
