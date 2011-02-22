@@ -4,7 +4,7 @@ Plugin Name: PHPEnkoder
 Plugin URI: http://www.weaselhat.com/phpenkoder/
 Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module.  Automatically scrambles e-mails in plaintext and mailtos; adds the <tt>[enkode]...[/enkode]</tt> shortcode to allow for arbitrary use.  Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.7
+Version: 1.8
 Author URI: http://www.weaselhat.com/
 */
 
@@ -62,8 +62,8 @@ enkoder_ are for plugin setup; and those with enk_ are intended to be
 private.
 */
 
-define(MAX_PASSES, 20);
-define(MAX_LENGTH, 1024);
+define("MAX_PASSES", 20);
+define("MAX_LENGTH", 1024);
 
 /* WORDPRESS LOGIC *****************/
 /*
@@ -75,11 +75,11 @@ for explicit e-mail links.  Naturally, the latter must be run first
 links.
 */
 
-add_option('enkode_pt',  1, 'Enkode plaintext e-mail addresses.');
-add_option('enkode_mt',  1, 'Enkode mailto: e-mail addresses.');
-add_option('enkode_rss', 1, '0 => don\'t enkode in RSS, 1 => hide in RSS, 2 => enkode in RSS.');
-add_option('enkode_msg', "email hidden; JavaScript is required", "Message to display to non-JavaScript-capable browers (and on RSS).");
-add_option('enkode_class', '', 'Class attribute to use on generated mailto: tags');
+add_option('enkode_pt',  1);
+add_option('enkode_mt',  1);
+add_option('enkode_rss', 1);
+add_option('enkode_msg', "email hidden; JavaScript is required");
+add_option('enkode_class', '');
 
 /* config stuff unabashedly stolen from akismet */
 add_action('admin_menu', 'enkoder_config_page');
