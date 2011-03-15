@@ -8,8 +8,7 @@ Stable tag: 1.9
 
 Encodes mailto: links and e-mail addresses with JavaScript to stifle
 webcrawlers.  Automatically turns plaintext e-mails into (enkoded)
-links.  Adds the `[enkode]...[/enkode]` shortcode to allow for
-arbitrary use.
+links.
 
 == Description ==
 
