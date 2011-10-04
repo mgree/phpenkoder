@@ -3,8 +3,8 @@ Contributors: michael_greenberg
 Donate link: http://www.weaselhat.com/phpenkoder/
 Tags: spam, bot, robot, crawler, harvest, mailto, email, e-mail, encrypt, javascript, js, enkoder, hide, crawl, link, encode, encoder, encoding, enkode, mail, spambot, human, address, addresses, safe, plaintext, hidden, obfuscate, obfuscator, hider, anti-spam, hivelogic, shortcode, anti-spam
 Requires at least: 2.3
-Tested up to: 3.1
-Stable tag: 1.9
+Tested up to: 3.2.1
+Stable tag: 1.10
 
 Encodes mailto: links and e-mail addresses with JavaScript to stifle
 webcrawlers.  Automatically turns plaintext e-mails into (enkoded)
@@ -35,11 +35,10 @@ scrambled[/enkode]`.
 == Installation ==
 
 1. Either: 
-  * Download and extract `phpenkoder.1.5.zip` from the plugin
+  * Go to 'Plugins > Add New' and search for PHPEnkoder
+  * Download and extract `phpenkoder.1.10.zip` from the plugin
     directory and upload `enkoder.php` to the
-    `/wordpress/wp-content/plugins/` directory, or
-  * Download `enkoder-1.5.{zip,tgz}` from the PHPEnkoder website and
-    extract it in the `/wordpress/` directory
+    `/wordpress/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Configure the plugin through its menu in `Settings`
 

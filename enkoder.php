@@ -4,14 +4,14 @@ Plugin Name: PHPEnkoder
 Plugin URI: http://www.weaselhat.com/phpenkoder/
 Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module.  Automatically scrambles e-mails in plaintext and mailtos; adds the <tt>[enkode]...[/enkode]</tt> shortcode to allow for arbitrary use.  Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.9
+Version: 1.10
 Author URI: http://www.weaselhat.com/
 */
 
 /* LICENSE (Modified BSD)
-Copyright (c) 2006, Michael Greenberg.  Derivative work of the
-Hivelogic Enkoder, Copyright (c) 2006, Automatic Corp.
-All rights reserved.
+Copyright (c) 2006-11, Michael Greenberg.  Derivative work of the
+Hivelogic Enkoder, Copyright (c) 2006, Automatic Corp.  All rights
+reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -137,8 +137,8 @@ $enkoder_plaintext_priority = 32;
 
 define("EMAIL_REGEX", '[\w\d+_.-]+@(?:[\w\d_-]+\.)+[\w]{2,6}');
 define("PTEXT_EMAIL", '/(?<=[^\w\d\+_.:-])(' . EMAIL_REGEX . ')/i'); /* note the banned first char */
-define("MAILTO_EMAIL", '#(<a.*?href="mailto:' . EMAIL_REGEX . '.*?>.*?</a>)#i');
-define("LINK_TEXT", "/>(.*?)</");
+define("MAILTO_EMAIL", '#(<a[^<>]*?href=(?:"\')mailto:' . EMAIL_REGEX . '[^<>]*?>.*?</a>)#i');
+define("LINK_TEXT", "#/>(.*?)</a#i");
 
 function enk_extract_linktext($text) {
   preg_match(LINK_TEXT, $text, $tmatches);
