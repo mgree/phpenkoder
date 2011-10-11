@@ -137,7 +137,7 @@ $enkoder_plaintext_priority = 32;
 
 define("EMAIL_REGEX", '[\w\d+_.-]+@(?:[\w\d_-]+\.)+[\w]{2,6}');
 define("PTEXT_EMAIL", '/(?<=[^\w\d\+_.:-])(' . EMAIL_REGEX . ')/i'); /* note the banned first char */
-define("MAILTO_EMAIL", '#(<a[^<>]*?href=(?:"\')mailto:' . EMAIL_REGEX . '[^<>]*?>.*?</a>)#i');
+define("MAILTO_EMAIL", '#(<a[^<>]*?href=[\042\047]mailto:' . EMAIL_REGEX . '[^<>]*?>.*?</a>)#i');
 define("LINK_TEXT", "#/>(.*?)</a#i");
 
 function enk_extract_linktext($text) {
