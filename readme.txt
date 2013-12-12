@@ -3,7 +3,7 @@ Contributors: michael_greenberg
 Donate link: http://www.weaselhat.com/phpenkoder/
 Tags: spam, bot, robot, crawler, harvest, mailto, email, e-mail, encrypt, javascript, js, enkoder, hide, crawl, link, encode, encoder, encoding, enkode, mail, spambot, human, address, addresses, safe, plaintext, hidden, obfuscate, obfuscator, hider, anti-spam, hivelogic, shortcode, anti-spam
 Requires at least: 2.3
-Tested up to: 3.4.1
+Tested up to: 3.8
 Stable tag: 1.11
 
 Encodes mailto: links and e-mail addresses with JavaScript to stifle
