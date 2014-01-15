@@ -4,7 +4,7 @@ Plugin Name: PHPEnkoder
 Plugin URI: http://www.weaselhat.com/phpenkoder/
 Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module.  Automatically scrambles e-mails in plaintext and mailtos; adds the <tt>[enkode]...[/enkode]</tt> shortcode to allow for arbitrary use.  Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.11
+Version: 1.12
 Author URI: http://www.weaselhat.com/
 */
 
@@ -75,6 +75,10 @@ for explicit e-mail links.  Naturally, the latter must be run first
 links.
 */
 
+//define("ENCODING",'UTF-8');
+//mb_internal_encoding(ENCODING); 
+//mb_regex_encoding(ENCODING); 
+
 add_option('enkode_pt',  1);
 add_option('enkode_mt',  1);
 add_option('enkode_rss', 1);
@@ -112,7 +116,7 @@ function enkoder_conf() {
 <fieldset>
 <legend>Enkoding options</legend>
 <p><input id="enk_pt"  name="enk_pt"  type="checkbox" <?php checked(1, get_option('enkode_pt')); ?> />&nbsp;<label for="enk_pt">Enkode plaintext e-mails</label></p>
-<p><input id="enk_mt"  name="enk_mt"  type="checkbox" <?php checked(1, get_option('enkode_mt')); ?> />&nbsp;<label for="enk_mt">Enkode mailto: links</label></p>
+<p><input id="enk_mt"  name="enk_mt"  type="checkbox" <?php checked(1, get_option('enkode_mt')); ?> />&nbsp;<label for="enk_mt">Enkode mailto: links</label></p> 
 </fieldset>
 <fieldset>
 <legend>RSS options</legend>
@@ -137,11 +141,11 @@ $enkoder_plaintext_priority = 32;
 
 define("EMAIL_REGEX", '[\w\d+_.-]+@(?:[\w\d_-]+\.)+[\w]{2,6}');
 define("PTEXT_EMAIL", '/(?<=[^\w\d\+_.:-])(' . EMAIL_REGEX . ')/i'); /* note the banned first char */
-define("MAILTO_EMAIL", '#(<a[^<>]*?href=[\042\047]mailto:' . EMAIL_REGEX . '[^<>]*?>.*?</a>)#i');
-define("LINK_TEXT", "#/>(.*?)</a#i");
+define("MAILTO_EMAIL", '#(<a[^<>]*?href=[\'\"]mailto:[^<>]*?>.*?</a>)#i');
+define("LINK_TEXT", "/>(.*?)</a");
 
 function enk_extract_linktext($text) {
-  preg_match(LINK_TEXT, $text, $tmatches);
+  $tmatches = array();
   return $tmatches[1];
 }
 
@@ -183,21 +187,21 @@ function enk_hide_emails($text) {
   return preg_replace(PTEXT_EMAIL, '(' . get_option("enkode_msg") . ')', $text);
 }
 
-function enkoder_manage_multi($hook, $action = 'add_filter', $filters = array('enkode_plaintext_emails', 'enkode_mailtos')) {
+function enkoder_manage_multi($hook, $action = 'add_filter') {
   global $enkoder_mailto_priority, $enkoder_plaintext_priority;
   
   if (get_option('enkode_mt'))
-    $action($hook, $filters[1], $enkoder_mailto_priority);
+    $action($hook, 'enkode_mailtos', $enkoder_mailto_priority);
   
   if (get_option('enkode_pt'))
-    $action($hook, $filters[0], $enkoder_plaintext_priority);
+    $action($hook, 'enkode_plaintext_emails', $enkoder_plaintext_priority);
 }
 
-function enkoder_manage_single($hook, $action = 'add_filter', $filter = 'enk_hide_emails') {
+function enkoder_manage_single($hook, $action = 'add_filter') {
   global $enkoder_plaintext_priority;
   
   if (get_option('enkode_pt') || get_option('enkode_mt'))
-    $action($hook, $filter, $enkoder_plaintext_priority);
+    $action($hook, 'enk_hide_emails', $enkoder_plaintext_priority);
 }
 
 /* actually set up the filters 
@@ -321,7 +325,7 @@ function enkode($content, $text = NULL, $max_passes = MAX_PASSES, $max_length = 
     $kode = enkode_pass($kode, $enc, $dec);
   }
 
-  /* mandatory numerical encoding, prevents catching @ signs and
+  /* mandatory numerical conversion, prevent catching @ signs and
      interpreting neighboring characters as e-mail addresses */
   $kode = enkode_pass($kode, 'enk_enc_num', $enk_dec_num);
   
@@ -334,7 +338,7 @@ Encodes a single pass.  $enc is a function pointer and $dec is the Javascript.
 */
 function enkode_pass($kode, $enc, $dec) {
   /* first encode */
-  $kode = addslashes($enc($kode));
+  $kode = mb_addslashes($enc($kode));
 
   /* then generate encoded code with decoding afterwards */
   $kode = "kode=\"$kode\";$dec;"; 
@@ -355,7 +359,7 @@ $enkoder_uses = 0;
 define('JS_LEN', 269);
 function enk_build_js($kode, $text = NULL) {
   global $enkoder_uses;
-  $clean = addslashes($kode);
+  $clean = mb_addslashes($kode);
   
   $msg = is_null($text) ? get_option('enkode_msg') : $text;
   
@@ -377,6 +381,25 @@ EOT;
 return $js;
 }
 
+// from https://gist.github.com/yuya-takeyama/402780
+function mb_addslashes($input, $enc = NULL)
+{
+    if (is_null($enc)) {
+        $enc = mb_internal_encoding();
+    }
+    $len = mb_strlen($input, $enc);
+    $result = '';
+    for ($i = 0; $i < $len; $i++)
+    {
+        $char = mb_substr($input, $i, 1, $enc);
+        if (strlen($char) === 1) {
+            $char = addslashes($char);
+        }
+        $result .= $char;
+    }
+    return $result;
+}
+
 /* ENCODINGS ***********************/
 /* 
    Each encoding should consist of a function and a Javascript string;
@@ -387,68 +410,82 @@ return $js;
 
 /* REVERSE ENCODING */
 function enk_enc_reverse($s) {
-  return strrev($s);
+  $str = strval($s);
+  
+  $len = mb_strlen($str);
+  $o = "";
+  for ($i = $len - 1;$i >= 0;$i--) {
+    $o .= mb_substr($str,$i,1);
+  }
+
+  return $o;  
 }
 
 $enk_dec_reverse = <<<EOT
 kode=kode.split('').reverse().join('')
 EOT;
 
-/* SHIFT ENCODING */
-/* This is buggy -- javascript bugs out when some weird characters are
-   included.  For this reason, enk_enc_num is written below. */
-/*
-function enk_enc_shift($s) {
-  $shifted = strval($s);
-
-  $len = strlen($s);
-  for ($i = 0;$i < $len;$i++) {
-    $b = ord($s[$i]) + 3;
-    if ($b > 127) { $b -= 128; }
-    $shifted[$i] = chr($b);
-  }
-
-  return $shifted;
-}
-
-$enk_dec_shift = <<<EOT
-x='';for(i=0;i<kode.length;i++){c=kode.charCodeAt(i)-3;if(c<0)c+=128;x+=String.fromCharCode(c)}kode=x
-EOT;
-*/
-
 /* NUM ENCODING (adapted)*/
 function enk_enc_num($s) {
   $nums = "";
-  
-  $len = strlen($s);
-  for ($i = 0;$i < $len;$i++) {
-    $nums .= strval(ord($s[$i]) + 3);
-    if ($i < $len - 1) { $nums .= ' '; } /* pwned lol rotfl!!!11 */
-  }
-  
+
+  // switch to an always 4-byte encoding, to get better numbers out
+  // adapted from http://us1.php.net/ord#72463
+  $s = mb_convert_encoding($s,"UCS-4BE");
+  $len = mb_strlen($s,"UCS-4BE");
+  for($i = 0; $i < $len; $i++) { 
+    $c = mb_substr($s,$i,1,"UCS-4BE"); 
+    $ord = unpack("N",$c)[1];
+    $nums .= strval($ord + 3);
+    if ($i < $len - 1) { $nums .= ' '; }
+
+  }        
   return $nums;
 }
 
 $enk_dec_num = <<<EOT
-kode=kode.split(' ');x='';for(i=0;i<kode.length;i++){x+=String.fromCharCode(parseInt(kode[i])-3)}kode=x
+kode=kode.split(' ');x='';for(i=0;i<kode.length;i++){x+=String.fromCharCode(parseInt(kode[i]-3))}kode=x
 EOT;
 
 /* SWAP ENCODING */
 function enk_enc_swap($s) {
   $swapped = strval($s);
-  
-  $len = strlen($s);
+
+  $len = mb_strlen($swapped);
+  $o = "";
   for ($i = 0;$i < $len - 1;$i += 2) {
-    $tmp = $swapped[$i + 1];
-    $swapped[$i + 1] = $swapped[$i];
-    $swapped[$i] = $tmp; /* 'fuck' is written here so you can grep for it */
+    $fst = mb_substr($swapped,$i,1);
+    $snd = mb_substr($swapped,$i+1,1);
+
+    $o .= $snd.$fst;
+  }
+
+  if ($len % 2 == 1) {
+    $o .= mb_substr($swapped,$len-1,1);
   }
   
-  return $swapped;
+  return $o;
 }
 
 $enk_dec_swap = <<<EOT
 x='';for(i=0;i<(kode.length-1);i+=2){x+=kode.charAt(i+1)+kode.charAt(i)}kode=x+(i<kode.length?kode.charAt(kode.length-1):'')
+EOT;
+
+function enk_enc_at($s) {
+  $str = strval($s);
+  
+  $len = mb_strlen($str);
+  $o = "";
+  for ($i = 0;$i < $len;$i++) {
+    $c = mb_substr($str,$i,1);
+    $o .= ($c == '@' ? '||' : $c.'_');
+  }
+
+  return $o;  
+}
+
+$enk_dec_at = <<<EOT
+x='';for(i=0;i<kode.length;i+=2){if(kode.charAt(i)=='|'&&kode.charAt(i+1)=='|'){x+='@'}else{x+=kode.charAt(i)}}kode=x
 EOT;
 
 /* ENCODING LIST *******************/
@@ -458,9 +495,10 @@ be used automatically by the enkode function.
 */
 
 $enkodings = array(
-array('enk_enc_reverse', $enk_dec_reverse),
-array('enk_enc_num',     $enk_dec_num),
-array('enk_enc_swap',    $enk_dec_swap)
+array('enk_enc_reverse',    $enk_dec_reverse),
+array('enk_enc_swap',    $enk_dec_swap),
+array('enk_enc_num', $enk_dec_num),
+array('enk_enc_at',    $enk_dec_at)
 );
 
 ?>
