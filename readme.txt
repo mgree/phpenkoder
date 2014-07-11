@@ -3,8 +3,10 @@ Contributors: michael_greenberg
 Donate link: http://www.weaselhat.com/phpenkoder/
 Tags: spam, bot, robot, crawler, harvest, mailto, email, e-mail, encrypt, javascript, js, enkoder, hide, crawl, link, encode, encoder, encoding, enkode, mail, spambot, human, address, addresses, safe, plaintext, hidden, obfuscate, obfuscator, hider, anti-spam, hivelogic, shortcode, anti-spam
 Requires at least: 2.3
-Tested up to: 3.9
+Tested up to: 3.9.1
 Stable tag: 1.12.1
+License: Modified BSD (BSDv3)
+License URI: http://opensource.org/licenses/BSD-3-Clause
 
 Encodes mailto: links and e-mail addresses with JavaScript to stifle
 webcrawlers.  Automatically turns plaintext e-mails into (enkoded)
@@ -44,6 +46,18 @@ scrambled[/enkode]`.
 
 == Frequently Asked Questions ==
 
+= Why doesn't PHP Enkoder work in the excerpt? =
+
+WordPress creates excerpts by simply stripping tags from truncated
+content. This results in some Javascript-protecting comments appearing
+in the excerpt text, as there isn't a convenient way to determine if
+content being rendered is meant for an excerpt or the page. For now, a
+customizable message appears; by default, it will be rendered as /*
+email hidden; JavaScript is required */. Any ideas for workarounds
+would be appreciated; please send them along.
+
+= Other questions? =
+
 See [the webpage](http://www.weaselhat.com/phpenkoder/) for more information.
 
 == Screenshots ==
@@ -51,3 +65,17 @@ See [the webpage](http://www.weaselhat.com/phpenkoder/) for more information.
 Not applicable!  PHPEnkoder is designed to make your website look the
 same to humans: e-mail addresses don't appear in the HTML source, but
 JavaScript converts the complicated encoding to valid HTML.
+
+== Changelog ==
+
+See [the webpage](http://www.weaselhat.com/phpenkoder/) for more
+information on changes.
+
+== Upgrade Notice ==
+
+See [the webpage](http://www.weaselhat.com/phpenkoder/) for
+information on updates.
+
+= 1.12.1 =
+
+Full unicode support.
