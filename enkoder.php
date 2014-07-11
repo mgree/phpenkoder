@@ -8,8 +8,8 @@ Version: 1.12.1
 Author URI: http://www.weaselhat.com/
 */
 
-/* LICENSE (Modified BSD)
-Copyright (c) 2006-11, Michael Greenberg.  Derivative work of the
+/* LICENSE (Modified BSD; BSD v3)
+Copyright (c) 2006-14, Michael Greenberg.  Derivative work of the
 Hivelogic Enkoder, Copyright (c) 2006, Automatic Corp.  All rights
 reserved.
 
@@ -25,7 +25,7 @@ met:
      the documentation and/or other materials provided with the
      distribution.
 
-  3. Neither the name of Michael Greenberg, AUTOMATIC CORP. nor the
+  3. Neither the name of Michael Greenberg, AUTOMATIC CORP., nor the
      names of its contributors may be used to endorse or promote
      products derived from this software without specific prior
      written permission.
@@ -405,7 +405,7 @@ function mb_addslashes($input, $enc = NULL)
    Each encoding should consist of a function and a Javascript string;
    the function performs some scrambling of a string, and the Javascript
    unscrambles that string (assuming that it's stored in a variable
-   kode).  The listed enkodings are those used in the Hivelogic Enkoder.
+   kode).
 */
 
 /* REVERSE ENCODING */
