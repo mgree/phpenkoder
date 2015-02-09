@@ -4,7 +4,7 @@ Plugin Name: PHPEnkoder
 Plugin URI: http://www.weaselhat.com/phpenkoder/
 Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module.  Automatically scrambles e-mails in plaintext and mailtos; adds the <tt>[enkode]...[/enkode]</tt> shortcode to allow for arbitrary use.  Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.12.1
+Version: 1.13
 Author URI: http://www.weaselhat.com/
 */
 
@@ -100,9 +100,9 @@ function enkoder_config_page() {
 
 function enkoder_conf() {
   if ( isset($_POST['submit']) ) {
-    check_admin_referer();
-    update_option('enkode_pt',  $_POST['enk_pt'] == 'on');
-    update_option('enkode_mt',  $_POST['enk_mt'] == 'on');
+    check_admin_referer('update_phpenkoder','enk_nonce');
+    update_option('enkode_pt',  isset($_POST['enk_pt']) && $_POST['enk_pt'] == 'on');
+    update_option('enkode_mt',  isset($_POST['enk_mt']) && $_POST['enk_mt'] == 'on');
     update_option('enkode_rss', intval($_POST['enk_rss']));
     update_option('enkode_msg', $_POST['enk_msg']); /* magic quotes better be on... */
     update_option('enkode_class', $_POST['enk_class']);
@@ -113,6 +113,7 @@ function enkoder_conf() {
 <p><?php _e('PHPEnkoder should put a stop to e-mail crawling.  But if you like spam, feel free to disable some of its protection.  Perhaps you only want to manually enkode a few things?'); ?></p>
 
 <form action="" method="post" id="phpenkoder-conf" style="margin: auto; width: 25em; ">
+<?php wp_nonce_field( 'update_phpenkoder','enk_nonce' ); ?>
 <fieldset>
 <legend>Enkoding options</legend>
 <p><input id="enk_pt"  name="enk_pt"  type="checkbox" <?php checked(1, get_option('enkode_pt')); ?> />&nbsp;<label for="enk_pt">Enkode plaintext e-mails</label></p>
@@ -142,10 +143,10 @@ $enkoder_plaintext_priority = 32;
 define("EMAIL_REGEX", '[\w\d+_.-]+@(?:[\w\d_-]+\.)+[\w]{2,6}');
 define("PTEXT_EMAIL", '/(?<=[^\w\d\+_.:-])(' . EMAIL_REGEX . ')/i'); /* note the banned first char */
 define("MAILTO_EMAIL", '#(<a[^<>]*?href=[\'\"]mailto:[^<>]*?>.*?</a>)#i');
-define("LINK_TEXT", "/>(.*?)</a");
+define("LINK_TEXT", "#/>(.*?)</a#i");
 
 function enk_extract_linktext($text) {
-  $tmatches = array();
+  $tmatches = preg_match(LINK_TEXT, $text, $tmatches); //array();
   return $tmatches[1];
 }
 
