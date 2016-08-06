@@ -3,7 +3,7 @@ Contributors: michael_greenberg
 Donate link: http://www.weaselhat.com/phpenkoder/
 Tags: spam, bot, robot, crawler, harvest, mailto, email, e-mail, encrypt, javascript, js, enkoder, hide, crawl, link, encode, encoder, encoding, enkode, mail, spambot, human, address, addresses, safe, plaintext, hidden, obfuscate, obfuscator, hider, anti-spam, hivelogic, shortcode, anti-spam
 Requires at least: 2.3
-Tested up to: 4.5.1
+Tested up to: 4.6
 Stable tag: 1.13
 License: Modified BSD (BSDv3)
 License URI: http://opensource.org/licenses/BSD-3-Clause
@@ -36,7 +36,7 @@ scrambled[/enkode]`.
 
 == Installation ==
 
-1. Either: 
+1. Either:
   * Go to 'Plugins > Add New' and search for PHPEnkoder
   * Download and extract `phpenkoder.1.12.1.zip` from the plugin
     directory and upload `enkoder.php` to the
