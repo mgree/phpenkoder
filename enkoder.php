@@ -2,9 +2,9 @@
 /*
 Plugin Name: PHPEnkoder
 Plugin URI: http://www.weaselhat.com/phpenkoder/
-Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module.  Automatically scrambles e-mails in plaintext and mailtos; adds the <tt>[enkode]...[/enkode]</tt> shortcode to allow for arbitrary use.  Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
+Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module. Automatically scrambles e-mails in plaintext and mailtos; adds the <tt>[enkode]...[/enkode]</tt> shortcode to allow for arbitrary use. Disable on a page with the <tt>[noenkode]</tt> shortcode. Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.13
+Version: 1.14
 Author URI: http://www.weaselhat.com/
 */
 
@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-/* 
+/*
 Hello.  You probably don't want to read a lot of PHP.  I never really
 liked dollar signs, anyway.
 
@@ -67,7 +67,7 @@ define("MAX_LENGTH", 1024);
 
 /* WORDPRESS LOGIC *****************/
 /*
-Sets up the wordpress filters and config pages.  
+Sets up the wordpress filters and config pages.
 
 There are two kinds of filters: one for plaintext e-mails and another
 for explicit e-mail links.  Naturally, the latter must be run first
@@ -76,8 +76,8 @@ links.
 */
 
 //define("ENCODING",'UTF-8');
-//mb_internal_encoding(ENCODING); 
-//mb_regex_encoding(ENCODING); 
+//mb_internal_encoding(ENCODING);
+//mb_regex_encoding(ENCODING);
 
 add_option('enkode_pt',  1);
 add_option('enkode_mt',  1);
@@ -91,8 +91,8 @@ add_action('admin_menu', 'enkoder_config_page');
 function enkoder_config_page() {
   if (function_exists('add_options_page')) {
     add_options_page(__('PHPEnkoder'),
-                     __('PHPEnkoder'), 
-                     'manage_options', 
+                     __('PHPEnkoder'),
+                     'manage_options',
                      basename(__FILE__),
                      'enkoder_conf');
   }
@@ -117,7 +117,7 @@ function enkoder_conf() {
 <fieldset>
 <legend>Enkoding options</legend>
 <p><input id="enk_pt"  name="enk_pt"  type="checkbox" <?php checked(1, get_option('enkode_pt')); ?> />&nbsp;<label for="enk_pt">Enkode plaintext e-mails</label></p>
-<p><input id="enk_mt"  name="enk_mt"  type="checkbox" <?php checked(1, get_option('enkode_mt')); ?> />&nbsp;<label for="enk_mt">Enkode mailto: links</label></p> 
+<p><input id="enk_mt"  name="enk_mt"  type="checkbox" <?php checked(1, get_option('enkode_mt')); ?> />&nbsp;<label for="enk_mt">Enkode mailto: links</label></p>
 </fieldset>
 <fieldset>
 <legend>RSS options</legend>
@@ -190,29 +190,29 @@ function enk_hide_emails($text) {
 
 function enkoder_manage_multi($hook, $action = 'add_filter') {
   global $enkoder_mailto_priority, $enkoder_plaintext_priority;
-  
+
   if (get_option('enkode_mt'))
     $action($hook, 'enkode_mailtos', $enkoder_mailto_priority);
-  
+
   if (get_option('enkode_pt'))
     $action($hook, 'enkode_plaintext_emails', $enkoder_plaintext_priority);
 }
 
 function enkoder_manage_single($hook, $action = 'add_filter') {
   global $enkoder_plaintext_priority;
-  
+
   if (get_option('enkode_pt') || get_option('enkode_mt'))
     $action($hook, 'enk_hide_emails', $enkoder_plaintext_priority);
 }
 
-/* actually set up the filters 
+/* actually set up the filters
 
    note that this procedure is paramaterized over the action.
    to set up, pass in 'add_action'.  to tear down, pass in 'remove_action'
 */
 function enkoder_manage_filters($action) {
   $content_hook = array('the_content', 'get_comment_text');
-  
+
   /* set up standard content filters */
   foreach ($content_hook as $hook) {
     enkoder_manage_multi($hook, $action);
@@ -223,7 +223,7 @@ function enkoder_manage_filters($action) {
   $conf_enk_rss = intval(get_option('enkode_rss'));
   if      ($conf_enk_rss == 2) $reg_rss = 'enkoder_manage_multi';
   else if ($conf_enk_rss == 1) $reg_rss = 'enkoder_manage_single';
-  
+
   if (isset($reg_rss)) {
     foreach ($rss_hook as $hook) {
       $reg_rss($hook, $action);
@@ -256,6 +256,12 @@ function enk_shortcode_handler($atts, $content = NULL) {
 /* actually set up shortcode */
 add_shortcode('enkode', 'enk_shortcode_handler');
 
+/* shortcode to disable PHPEnkoder */
+function enk_noenkode_handler($atts, $content = NULL) {
+  enkoder_unregister_filters();
+}
+
+add_shortcode('noenkode', 'enk_noenkode_handler');
 
 /* ENCODING ************************/
 
@@ -271,15 +277,15 @@ function enkode_mailto($email, $text, $subject = "", $title = "") {
   if ($cls) $content .= "class='".$cls."' ";
 
   $content .= 'href="mailto:' . $email;
-  
+
   if ($subject) $content .= "?subject=$subject";
-  
+
   $content .= '"';
-  
+
   if ($title) $content .= " title=\"$title\"";
-  
+
   $content .= ">$text</a>";
-  
+
   return enkode($content);
 }
 
@@ -306,14 +312,14 @@ function enkode($content, $text = NULL, $max_passes = MAX_PASSES, $max_length = 
   global $enkodings, $enk_dec_num;
 
   /* our base case -- we'll eventually evaluate this code */
-  $kode = "document.write(\"" . 
+  $kode = "document.write(\"" .
     addcslashes($content,"\\\'\"&\n\r<>") .
     "\");";
 
   $max_length = max($max_length, strlen($kode) + JS_LEN + 1);
-  
+
   $result = "";
-  
+
   /* build up as many encodings as we can */
   for ($passes = 0;
        $passes < $max_passes && strlen($kode) < $max_length;
@@ -322,14 +328,14 @@ function enkode($content, $text = NULL, $max_passes = MAX_PASSES, $max_length = 
     $idx = rand(0, count($enkodings) - 1);
     $enc = $enkodings[$idx][0];
     $dec = $enkodings[$idx][1];
-    
+
     $kode = enkode_pass($kode, $enc, $dec);
   }
 
   /* mandatory numerical conversion, prevent catching @ signs and
      interpreting neighboring characters as e-mail addresses */
   $kode = enkode_pass($kode, 'enk_enc_num', $enk_dec_num);
-  
+
   return enk_build_js($kode, $text);
 }
 
@@ -342,7 +348,7 @@ function enkode_pass($kode, $enc, $dec) {
   $kode = mb_addslashes($enc($kode));
 
   /* then generate encoded code with decoding afterwards */
-  $kode = "kode=\"$kode\";$dec;"; 
+  $kode = "kode=\"$kode\";$dec;";
 
   return $kode;
 }
@@ -361,9 +367,9 @@ define('JS_LEN', 269);
 function enk_build_js($kode, $text = NULL) {
   global $enkoder_uses;
   $clean = mb_addslashes($kode);
-  
+
   $msg = is_null($text) ? get_option('enkode_msg') : $text;
-  
+
   $name = "enkoder_" . strval($enkoder_uses) . "_" . strval(rand());
   $enkoder_uses += 1;
   $js = <<<EOT
@@ -402,7 +408,7 @@ function mb_addslashes($input, $enc = NULL)
 }
 
 /* ENCODINGS ***********************/
-/* 
+/*
    Each encoding should consist of a function and a Javascript string;
    the function performs some scrambling of a string, and the Javascript
    unscrambles that string (assuming that it's stored in a variable
@@ -412,14 +418,14 @@ function mb_addslashes($input, $enc = NULL)
 /* REVERSE ENCODING */
 function enk_enc_reverse($s) {
   $str = strval($s);
-  
+
   $len = mb_strlen($str);
   $o = "";
   for ($i = $len - 1;$i >= 0;$i--) {
     $o .= mb_substr($str,$i,1);
   }
 
-  return $o;  
+  return $o;
 }
 
 $enk_dec_reverse = <<<EOT
@@ -434,14 +440,14 @@ function enk_enc_num($s) {
   // adapted from http://us1.php.net/ord#72463
   $s = mb_convert_encoding($s,"UCS-4BE");
   $len = mb_strlen($s,"UCS-4BE");
-  for($i = 0; $i < $len; $i++) { 
-    $c = mb_substr($s,$i,1,"UCS-4BE"); 
+  for($i = 0; $i < $len; $i++) {
+    $c = mb_substr($s,$i,1,"UCS-4BE");
     $bs = unpack("N",$c);
     $ord = $bs[1];
     $nums .= strval($ord + 3);
     if ($i < $len - 1) { $nums .= ' '; }
 
-  }        
+  }
   return $nums;
 }
 
@@ -465,7 +471,7 @@ function enk_enc_swap($s) {
   if ($len % 2 == 1) {
     $o .= mb_substr($swapped,$len-1,1);
   }
-  
+
   return $o;
 }
 
@@ -475,7 +481,7 @@ EOT;
 
 function enk_enc_at($s) {
   $str = strval($s);
-  
+
   $len = mb_strlen($str);
   $o = "";
   for ($i = 0;$i < $len;$i++) {
@@ -483,7 +489,7 @@ function enk_enc_at($s) {
     $o .= ($c == '@' ? '||' : $c.'_');
   }
 
-  return $o;  
+  return $o;
 }
 
 $enk_dec_at = <<<EOT
