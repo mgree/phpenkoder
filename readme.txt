@@ -56,6 +56,13 @@ customizable message appears; by default, it will be rendered as /*
 email hidden; JavaScript is required */. Any ideas for workarounds
 would be appreciated; please send them along.
 
+= I opened up the inspector and I saw my supposedly encoded text. What gives? =
+
+The inspector shows the current live state of the DOM---how the page
+looks right now. Once PHPEnkoder's generated JavaScript runs, then the
+DOM will include all of the secrets. If you check the source, you'll
+see that your secrets are safe from (naively) prying eyes.
+
 = Other questions? =
 
 See [the webpage](http://www.weaselhat.com/phpenkoder/) for more information.
