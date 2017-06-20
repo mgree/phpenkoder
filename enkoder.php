@@ -4,7 +4,7 @@ Plugin Name: PHPEnkoder
 Plugin URI: http://www.weaselhat.com/phpenkoder/
 Description: An anti-spam text scrambler based on the <a href="http://hivelogic.com/enkoder">Hivelogic Enkoder</a> Ruby on Rails TextHelper module. Automatically scrambles e-mails in plaintext and mailtos; adds the <tt>[enkode]...[/enkode]</tt> shortcode to allow for arbitrary use. Disable on a page with the <tt>[noenkode]</tt> shortcode. Hat tip: Dan Benjamin for the original Ruby code, Yaniv Zimet for pure grit.
 Author: Michael Greenberg
-Version: 1.14
+Version: 1.14.1
 Author URI: http://www.weaselhat.com/
 */
 
@@ -270,7 +270,7 @@ add_shortcode('noenkode', 'enk_noenkode_handler');
 Encodes a mailto link.
 
 */
-function enkode_mailto($email, $text, $subject = "", $title = "") {
+function enkode_mailto($email, $text, $subject = "", $title = "", $max_passes = MAX_PASSES, $max_length = MAX_LENGTH) {
   $content = '<a ';
 
   $cls = get_option('enkode_class');
@@ -286,7 +286,7 @@ function enkode_mailto($email, $text, $subject = "", $title = "") {
 
   $content .= ">$text</a>";
 
-  return enkode($content);
+  return enkode($content, NULL, $max_passes, $max_length);
 }
 
 /* enkode($content, $text = NULL, $max_passes = 20, $max_length = 1024)
