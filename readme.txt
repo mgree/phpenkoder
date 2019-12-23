@@ -3,8 +3,8 @@ Contributors: michael_greenberg
 Donate link: http://www.weaselhat.com/phpenkoder/
 Tags: spam, bot, robot, crawler, harvest, mailto, email, e-mail, encrypt, javascript, js, enkoder, hide, crawl, link, encode, encoder, encoding, enkode, mail, spambot, human, address, addresses, safe, plaintext, hidden, obfuscate, obfuscator, hider, anti-spam, hivelogic, shortcode, anti-spam
 Requires at least: 2.3
-Tested up to: 5.3
-Stable tag: 1.14.1
+Tested up to: 5.3.2
+Stable tag: 1.15
 License: Modified BSD (BSDv3)
 License URI: http://opensource.org/licenses/BSD-3-Clause
 
@@ -82,6 +82,11 @@ information on changes.
 
 See [the webpage](http://www.weaselhat.com/phpenkoder/) for
 information on updates.
+
+= 1.15 =
+
+Thanks to [zitrusblau](https://github.com/zitrusblau) for implementing
+programmatic control of when PHPEnkoder runs.
 
 = 1.14.1 =
 
