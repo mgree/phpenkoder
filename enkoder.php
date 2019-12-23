@@ -137,8 +137,8 @@ function enkoder_conf() {
 
 }
 
-$enkoder_mailto_priority = 31;
-$enkoder_plaintext_priority = 32;
+$enkoder_mailto_priority = apply_filters('enkoder_mailto_priority', 31);
+$enkoder_plaintext_priority = apply_filters('enkoder_plaintext_priority', 32);
 
 define("EMAIL_REGEX", '[\w\d+_.-]+@(?:[\w\d_-]+\.)+[\w]{2,6}');
 define("PTEXT_EMAIL", '/(?<=[^\w\d\+_.:-])(' . EMAIL_REGEX . ')/i'); /* note the banned first char */
