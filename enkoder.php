@@ -143,10 +143,10 @@ $enkoder_plaintext_priority = apply_filters('enkoder_plaintext_priority', 32);
 define("EMAIL_REGEX", '[\w\d+_.-]+@(?:[\w\d_-]+\.)+[\w]{2,6}');
 define("PTEXT_EMAIL", '/(?<=[^\w\d\+_.:-])(' . EMAIL_REGEX . ')/i'); /* note the banned first char */
 define("MAILTO_EMAIL", '#(<a[^<>]*?href=[\'\"]mailto:[^<>]*?>.*?</a>)#i');
-define("LINK_TEXT", "#/>(.*?)</a#i");
+define("LINK_TEXT", "#>(.*?)</a#i");
 
 function enk_extract_linktext($text) {
-  $tmatches = preg_match(LINK_TEXT, $text, $tmatches); //array();
+  preg_match(LINK_TEXT, $text, $tmatches); //array();
   return $tmatches[1];
 }
 
