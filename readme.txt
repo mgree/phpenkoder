@@ -1,3 +1,5 @@
+As of 2024-11-01, I no longer maintain this plugin: due to bounced email it was deactivated, and reactivating it would require extensive changes to satisfy the Wordpress linter.
+
 === PHPEnkoder ===
 Contributors: michael_greenberg
 Donate link: http://www.weaselhat.com/phpenkoder/
